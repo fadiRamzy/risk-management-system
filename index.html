@@ -700,12 +700,13 @@ async function connectFirebase(silent=false){
           // Sync files metadata from DB — rebuild deduped list every snapshot
           const months=[...new Set(DB.map(r=>r.الشهر).filter(Boolean))];
           const rebuiltFiles=[];
-          months.forEach(m=>{
-            // Keep existing entry metadata if available (preserves real file name/date)
-            const existing=FILES.find(f=>f.month===m);
-            rebuiltFiles.push(existing||{name:`تقرير_${m}.xlsx`,rows:DB.filter(r=>r.الشهر===m).length,month:m,date:'—'});
-          });
-          FILES=rebuiltFiles; // replace entirely — no duplicates
+          m// ✅ الكود الجديد — يُعيد بناء FILES من الصفر في كل snapshot
+const rebuiltFiles = [];
+months.forEach(m => {
+  const existing = FILES.find(f => f.month === m);  // يحتفظ بالبيانات الموجودة
+  rebuiltFiles.push(existing || { name: `تقرير_${m}.xlsx`, ... });
+});
+FILES = rebuiltFiles;  // ← استبدال كامل، صفر تكرار
 
           renderUI();
           if(firstLoad){
@@ -1117,13 +1118,13 @@ function renderMod(uid){
     return `<div class="di"><div class="dk">${lbl}</div><div class="dv ${isRej?'rej':'money'}">${esc(v)}${dur}</div></div>`;
   };
 
-  const g1=`
-    ${di('الفرع','الفرع')} ${di('تاريخ الزيارة','تاريخ_زيارة','date')} ${di('الشهر','الشهر')}
-    <div class="di s2"><div class="dk">اسم العميل</div><div class="dv">${esc(r['اسم_عميل']||'—')}</div></div>
-    <div class="di"><div class="dk">كود العميل</div><div class="dv code">${esc(r['كود_عميل']||'—')}</div></div>
-    ${di('نوع المشروع','نوع_مشروع')} ${di('حالة العميل','حاله_عميل')} ${di('الدورة','دوره')}
-    <div class="di s2"><div class="dk">عنوان العميل</div><div class="dv">${esc(r['عنوان_عميل']||'—')}</div></div>
-    ${di('حالة الإصدار','حاله_اصدار')}`;
+  // ✅ الكود الجديد — يبحث في r[key]
+const di = (lbl, key, cls='') => {
+  const v = r[key];  // ← يجلب القيمة من سجل العميل
+  return (!v || v==='-' || v==='—')
+    ? `...<div class="dv">—</div>...`   // دائماً يعرض — بدل الإخفاء
+    : `...<div class="dv">${esc(String(v))}</div>...`;
+};
 
   const g2=`
     ${diM('رأي مدير الفرع','راي_فرع','مده_فرع')}
