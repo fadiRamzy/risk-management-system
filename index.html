@@ -318,7 +318,7 @@ tbody tr{animation:rin .16s ease both}
       <label>كلمة المرور</label>
       <input type="password" id="pwIn" placeholder="••••••••••••" onkeydown="if(event.key==='Enter')doLogin()">
     </div>
-    <button class="lbtn" id="lbtn" onclick="doLogin()">دخول ←</button>
+    <button onclick="doLogin()">دخول</button>
     <div class="lerr" id="lerr">❌ كلمة المرور غير صحيحة</div>
   </div>
 </div>
@@ -601,7 +601,7 @@ tbody tr{animation:rin .16s ease both}
 <!-- SheetJS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
-<script type="module">
+<script>
 'use strict';
 
 // ════════════════════════════════════════════════════════
@@ -1722,6 +1722,10 @@ async function loadFvHistory(){
 // Share Firebase db instance with field visits
 const _origSetSyncUI = window.setSyncUI || setSyncUI;
 
-</script>
+</Object.assign(window, {
+  doLogin,
+  doRoleLogin,
+  backToMain
+});>
 </body>
 </html>
