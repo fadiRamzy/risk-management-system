@@ -310,16 +310,16 @@ tbody tr{animation:rin .16s ease both}
 
 <!-- LOGIN -->
 <div id="loginWrap">
-  <div class="lcard">
-    <div class="lmark">🏦</div>
-    <h1>نظام زيارات إدارة المخاطر</h1>
-    <p class="lsub">بني سويف · الفيوم · جميع الفروع<br>أدخل كلمة المرور للوصول</p>
-    <div class="lf">
-      <label>كلمة المرور</label>
-      <input type="password" id="pwIn" placeholder="••••••••••••" onkeydown="if(event.key==='Enter')doLogin()">
-    </div>
-    <button class="lbtn" id="lbtn" onclick="doLogin()">دخول ←</button>
-    <div class="lerr" id="lerr">❌ كلمة المرور غير صحيحة</div>
+  <input type="password" id="password" placeholder="ادخل كلمة المرور">
+  <button onclick="doLogin()">دخول</button>
+</div>
+
+<div id="roleWrap" style="display:none;">
+  <input type="text" id="code" placeholder="كود الدخول">
+  <input type="password" id="rolePassword" placeholder="كلمة المرور">
+  <button onclick="doRoleLogin()">دخول</button>
+  <button onclick="backToMain()">رجوع</button>
+</div>
   </div>
 </div>
 
@@ -601,7 +601,7 @@ tbody tr{animation:rin .16s ease both}
 <!-- SheetJS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
-<script type="module">
+<script>>
 'use strict';
 
 // ════════════════════════════════════════════════════════
@@ -1724,4 +1724,91 @@ const _origSetSyncUI = window.setSyncUI || setSyncUI;
 
 </script>
 </body>
+  <script>
+function doLogin() {
+  const password = document.getElementById("password").value.trim();
+
+  if (password === "Fadicash@2026") {
+    document.getElementById("loginWrap").style.display = "none";
+    document.getElementById("roleWrap").style.display = "block";
+  } else {
+    alert("كلمة المرور غير صحيحة");
+  }
+}
+
+function doRoleLogin() {
+  const code = document.getElementById("code").value.trim();
+  const pass = document.getElementById("rolePassword").value.trim();
+
+  if (code === "100100" && pass === "fadicash@2026") {
+    // مسؤول مخاطر
+    alert("دخول مسؤول ميداني");
+    showFieldPage();
+  } 
+  else if (code === "1002406" && pass === "Fadicash@2026") {
+    // مدير
+    alert("دخول المدير");
+    document.getElementById("roleWrap").style.display = "none";
+    document.getElementById("app").style.display = "block";
+    initApp && initApp();
+  } 
+  else {
+    alert("بيانات غير صحيحة");
+  }
+}
+
+function backToMain() {
+  document.getElementById("roleWrap").style.display = "none";
+  document.getElementById("loginWrap").style.display = "block";
+}
+
+// مثال بسيط لصفحة الزيارات (عدلها حسب موقعك)
+function showFieldPage() {
+  document.getElementById("roleWrap").style.display = "none";
+
+  // اخفاء باقي الموقع
+  if(document.getElementById("app")){
+    document.getElementById("app").style.display = "none";
+  }
+
+  let fieldPage = document.getElementById("fieldPage");
+
+  if (!fieldPage) {
+    fieldPage = document.createElement("div");
+    fieldPage.id = "fieldPage";
+    fieldPage.innerHTML = `
+      <h2>الزيارات الميدانية</h2>
+      <input placeholder="اسم العميل"><br><br>
+      <input placeholder="اسم القائم بالزيارة"><br><br>
+      <button onclick="getGPS()">تحديد الموقع</button><br><br>
+      <button onclick="submitFieldVisit()">ارسال</button>
+    `;
+    document.body.appendChild(fieldPage);
+  }
+
+  fieldPage.style.display = "block";
+}
+
+// GPS
+function getGPS() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(pos => {
+      alert("تم تحديد الموقع");
+      window.lat = pos.coords.latitude;
+      window.lng = pos.coords.longitude;
+    });
+  } else {
+    alert("المتصفح لا يدعم GPS");
+  }
+}
+
+function submitFieldVisit() {
+  alert("تم ارسال الزيارة (اربطها بـ Firebase)");
+}
+
+// مهم جدًا
+window.doLogin = doLogin;
+window.doRoleLogin = doRoleLogin;
+window.backToMain = backToMain;
+</script>
 </html>
