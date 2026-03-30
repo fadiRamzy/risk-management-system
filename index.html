@@ -697,14 +697,15 @@ async function connectFirebase(silent=false){
           DB=snapshot.docs.map(d=>d.data());
           console.log('[FIREBASE] DB updated:', DB.length, 'records');
 
-          // Sync files metadata from DB
+          // Sync files metadata from DB — rebuild deduped list every snapshot
           const months=[...new Set(DB.map(r=>r.الشهر).filter(Boolean))];
-          // Don't overwrite FILES if they have extra metadata
+          const rebuiltFiles=[];
           months.forEach(m=>{
-            if(!FILES.find(f=>f.month===m)){
-              FILES.push({name:`تقرير_${m}.xlsx`,rows:DB.filter(r=>r.الشهر===m).length,month:m,date:'—'});
-            }
+            // Keep existing entry metadata if available (preserves real file name/date)
+            const existing=FILES.find(f=>f.month===m);
+            rebuiltFiles.push(existing||{name:`تقرير_${m}.xlsx`,rows:DB.filter(r=>r.الشهر===m).length,month:m,date:'—'});
           });
+          FILES=rebuiltFiles; // replace entirely — no duplicates
 
           renderUI();
           if(firstLoad){
@@ -1108,8 +1109,7 @@ function renderMod(uid){
   document.getElementById('modT').textContent=r['اسم_عميل']||'تفاصيل العميل';
   document.getElementById('modS').textContent=`${r['الفرع']||''} · كود: ${r['كود_عميل']||'—'} · ${r['الشهر']||''}`;
 
-  const di=(lbl,v,cls='')=>(!v||v==='-')?'':
-    `<div class="di ${cls}"><div class="dk">${lbl}</div><div class="dv ${cls}">${esc(String(v))}</div></div>`;
+  const di=(lbl,key,cls='')=>{const v=r[key];return(!v||v==='-'||v==='—')?`<div class="di ${cls}"><div class="dk">${lbl}</div><div class="dv ${cls}">—</div></div>`:`<div class="di ${cls}"><div class="dk">${lbl}</div><div class="dv ${cls}">${esc(String(v))}</div></div>`;};
   const diM=(lbl,vKey,durKey)=>{
     const v=r[vKey];if(!v||v==='-')return '';
     const isRej=v==='مرفوض';
